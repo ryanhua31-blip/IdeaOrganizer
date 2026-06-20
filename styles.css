@@ -558,6 +558,22 @@ textarea:focus {
   flex-wrap: wrap;
 }
 
+.tool-button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 12px;
+  font-weight: 800;
+}
+
+.tool-button.active {
+  border-color: var(--coral);
+  background: #fff0ed;
+  color: #ad3a2b;
+}
+
 .swatch {
   width: 32px;
   height: 32px;
@@ -584,6 +600,26 @@ textarea:focus {
 
 .swatch[data-color="#7763c5"] {
   background: #7763c5;
+}
+
+.swatch[data-color="#2563eb"] {
+  background: #2563eb;
+}
+
+.swatch[data-color="#16a34a"] {
+  background: #16a34a;
+}
+
+.swatch[data-color="#f59e0b"] {
+  background: #f59e0b;
+}
+
+.swatch[data-color="#dc2626"] {
+  background: #dc2626;
+}
+
+.swatch[data-color="#ffffff"] {
+  background: #ffffff;
 }
 
 .size-control {

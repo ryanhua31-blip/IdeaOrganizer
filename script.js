@@ -73,6 +73,7 @@ const boardModalTitle = document.querySelector("#boardModalTitle");
 const closeBoardButton = document.querySelector("#closeBoardButton");
 const clearBoardButton = document.querySelector("#clearBoardButton");
 const saveBoardButton = document.querySelector("#saveBoardButton");
+const eraserButton = document.querySelector("#eraserButton");
 const boardCanvas = document.querySelector("#boardCanvas");
 const brushSize = document.querySelector("#brushSize");
 const swatches = document.querySelectorAll(".swatch");
@@ -81,6 +82,7 @@ const boardContext = boardCanvas.getContext("2d");
 let activeBoardItem = null;
 let isDrawing = false;
 let brushColor = "#1f2933";
+let isErasing = false;
 let lastPoint = null;
 
 function loadData() {
@@ -450,8 +452,8 @@ function draw(event) {
   const nextPoint = getCanvasPoint(event);
   boardContext.lineCap = "round";
   boardContext.lineJoin = "round";
-  boardContext.strokeStyle = brushColor;
-  boardContext.lineWidth = Number(brushSize.value);
+  boardContext.strokeStyle = isErasing ? "#ffffff" : brushColor;
+  boardContext.lineWidth = Number(brushSize.value) * (isErasing ? 2.4 : 1);
   boardContext.beginPath();
   boardContext.moveTo(lastPoint.x, lastPoint.y);
   boardContext.lineTo(nextPoint.x, nextPoint.y);
@@ -494,8 +496,22 @@ boardModal.addEventListener("click", (event) => {
 swatches.forEach((swatch) => {
   swatch.addEventListener("click", () => {
     brushColor = swatch.dataset.color;
+    isErasing = false;
+    eraserButton.classList.remove("active");
     swatches.forEach((button) => button.classList.toggle("active", button === swatch));
   });
+});
+
+eraserButton.addEventListener("click", () => {
+  isErasing = !isErasing;
+  eraserButton.classList.toggle("active", isErasing);
+
+  if (isErasing) {
+    swatches.forEach((button) => button.classList.remove("active"));
+  } else {
+    const matchingSwatch = [...swatches].find((swatch) => swatch.dataset.color === brushColor);
+    matchingSwatch?.classList.add("active");
+  }
 });
 
 setFilterButtons();
