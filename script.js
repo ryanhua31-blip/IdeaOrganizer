@@ -420,9 +420,11 @@ function openBoard(item) {
 }
 
 function closeBoard() {
+  persistBoard();
   boardModal.hidden = true;
   activeBoardItem = null;
   isDrawing = false;
+  render();
 }
 
 function resetCanvas() {
@@ -471,10 +473,17 @@ function saveBoard() {
     return;
   }
 
+  persistBoard();
+  closeBoard();
+}
+
+function persistBoard() {
+  if (!activeBoardItem) {
+    return;
+  }
+
   activeBoardItem.drawing = boardCanvas.toDataURL("image/png");
   saveData();
-  closeBoard();
-  render();
 }
 
 boardCanvas.addEventListener("pointerdown", (event) => {
