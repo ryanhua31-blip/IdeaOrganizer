@@ -68,6 +68,20 @@ const itemGrid = document.querySelector("#itemGrid");
 const filterButtons = document.querySelectorAll(".filter-button");
 const categoryTemplate = document.querySelector("#categoryTemplate");
 const itemTemplate = document.querySelector("#itemTemplate");
+const boardModal = document.querySelector("#boardModal");
+const boardModalTitle = document.querySelector("#boardModalTitle");
+const closeBoardButton = document.querySelector("#closeBoardButton");
+const clearBoardButton = document.querySelector("#clearBoardButton");
+const saveBoardButton = document.querySelector("#saveBoardButton");
+const boardCanvas = document.querySelector("#boardCanvas");
+const brushSize = document.querySelector("#brushSize");
+const swatches = document.querySelectorAll(".swatch");
+const boardContext = boardCanvas.getContext("2d");
+
+let activeBoardItem = null;
+let isDrawing = false;
+let brushColor = "#1f2933";
+let lastPoint = null;
 
 function loadData() {
   const saved = localStorage.getItem(storageKey);
@@ -157,6 +171,7 @@ function renderItems() {
     itemNode.querySelector(".type-pill").textContent = labels[item.type];
     itemNode.querySelector("h3").textContent = item.title;
     itemNode.querySelector(".item-body").textContent = item.body;
+    renderCustomPanel(itemNode.querySelector(".custom-panel"), item, category);
 
     itemNode.querySelector(".delete-item").addEventListener("click", () => {
       category.items = category.items.filter((savedItem) => savedItem.id !== item.id);
@@ -168,6 +183,105 @@ function renderItems() {
 
     itemGrid.append(itemNode);
   });
+}
+
+function renderCustomPanel(panel, item, category) {
+  panel.innerHTML = "";
+
+  if (item.type === "note") {
+    const status = document.createElement("div");
+    const button = document.createElement("button");
+    status.className = "note-status";
+    status.innerHTML = `<strong>${item.pinned ? "Pinned note" : "Regular note"}</strong>${item.pinned ? "This one stays visually marked as important." : "Pin this if it needs attention."}`;
+    button.className = `custom-action${item.pinned ? " active" : ""}`;
+    button.type = "button";
+    button.textContent = item.pinned ? "Unpin note" : "Pin note";
+    button.addEventListener("click", () => {
+      item.pinned = !item.pinned;
+      render();
+    });
+    panel.append(status, button);
+  }
+
+  if (item.type === "task") {
+    const checklist = document.createElement("div");
+    checklist.className = "checklist";
+    const tasks = getLines(item.body);
+    item.checkedTasks = item.checkedTasks || {};
+
+    tasks.forEach((task, index) => {
+      const id = `${item.id}-task-${index}`;
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      const text = document.createElement("span");
+      checkbox.type = "checkbox";
+      checkbox.checked = Boolean(item.checkedTasks[index]);
+      checkbox.id = id;
+      text.textContent = task;
+      checkbox.addEventListener("change", () => {
+        item.checkedTasks[index] = checkbox.checked;
+        saveData();
+      });
+      label.append(checkbox, text);
+      checklist.append(label);
+    });
+
+    panel.append(checklist);
+  }
+
+  if (item.type === "board") {
+    const preview = document.createElement("div");
+    const button = document.createElement("button");
+    preview.className = "board-preview";
+    preview.innerHTML = `<strong>${item.drawing ? "Saved sketch" : "Blank board"}</strong>${item.drawing ? "Open it to keep drawing." : "Open the board and draw with a simple pen."}`;
+
+    if (item.drawing) {
+      const image = document.createElement("img");
+      image.src = item.drawing;
+      image.alt = `${item.title} whiteboard preview`;
+      preview.append(image);
+    }
+
+    button.className = "custom-action";
+    button.type = "button";
+    button.textContent = "Open board";
+    button.addEventListener("click", () => openBoard(item, category));
+    panel.append(preview, button);
+  }
+
+  if (item.type === "link") {
+    const url = findFirstUrl(item.body);
+    const preview = document.createElement("div");
+    preview.className = "link-preview";
+    preview.innerHTML = `<strong>${url ? getUrlLabel(url) : "Reference note"}</strong>${url ? url : "Add a URL in the details to turn this into a quick reference."}`;
+    panel.append(preview);
+
+    if (url) {
+      const button = document.createElement("button");
+      button.className = "custom-action";
+      button.type = "button";
+      button.textContent = "Open reference";
+      button.addEventListener("click", () => window.open(url, "_blank", "noopener"));
+      panel.append(button);
+    }
+  }
+}
+
+function getLines(text) {
+  return text.split("\n").map((line) => line.trim()).filter(Boolean);
+}
+
+function findFirstUrl(text) {
+  const match = text.match(/https?:\/\/[^\s]+/i);
+  return match ? match[0] : "";
+}
+
+function getUrlLabel(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "Reference link";
+  }
 }
 
 function moveItem(category, itemId, direction) {
@@ -228,7 +342,10 @@ itemForm.addEventListener("submit", (event) => {
     id: makeId("item"),
     type: itemType.value,
     title,
-    body
+    body,
+    checkedTasks: itemType.value === "task" ? {} : undefined,
+    pinned: false,
+    drawing: ""
   });
 
   itemTitle.value = "";
@@ -285,6 +402,100 @@ itemType.addEventListener("change", () => {
   };
 
   document.querySelector("#composerHint").textContent = hints[itemType.value];
+});
+
+function openBoard(item) {
+  activeBoardItem = item;
+  boardModalTitle.textContent = item.title;
+  boardModal.hidden = false;
+  resetCanvas();
+
+  if (item.drawing) {
+    const image = new Image();
+    image.onload = () => boardContext.drawImage(image, 0, 0, boardCanvas.width, boardCanvas.height);
+    image.src = item.drawing;
+  }
+}
+
+function closeBoard() {
+  boardModal.hidden = true;
+  activeBoardItem = null;
+  isDrawing = false;
+}
+
+function resetCanvas() {
+  boardContext.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
+  boardContext.fillStyle = "#ffffff";
+  boardContext.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
+}
+
+function getCanvasPoint(event) {
+  const rect = boardCanvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) * (boardCanvas.width / rect.width),
+    y: (event.clientY - rect.top) * (boardCanvas.height / rect.height)
+  };
+}
+
+function startDrawing(event) {
+  isDrawing = true;
+  lastPoint = getCanvasPoint(event);
+}
+
+function draw(event) {
+  if (!isDrawing || !lastPoint) {
+    return;
+  }
+
+  const nextPoint = getCanvasPoint(event);
+  boardContext.lineCap = "round";
+  boardContext.lineJoin = "round";
+  boardContext.strokeStyle = brushColor;
+  boardContext.lineWidth = Number(brushSize.value);
+  boardContext.beginPath();
+  boardContext.moveTo(lastPoint.x, lastPoint.y);
+  boardContext.lineTo(nextPoint.x, nextPoint.y);
+  boardContext.stroke();
+  lastPoint = nextPoint;
+}
+
+function stopDrawing() {
+  isDrawing = false;
+  lastPoint = null;
+}
+
+function saveBoard() {
+  if (!activeBoardItem) {
+    return;
+  }
+
+  activeBoardItem.drawing = boardCanvas.toDataURL("image/png");
+  saveData();
+  closeBoard();
+  render();
+}
+
+boardCanvas.addEventListener("pointerdown", (event) => {
+  boardCanvas.setPointerCapture(event.pointerId);
+  startDrawing(event);
+});
+boardCanvas.addEventListener("pointermove", draw);
+boardCanvas.addEventListener("pointerup", stopDrawing);
+boardCanvas.addEventListener("pointercancel", stopDrawing);
+closeBoardButton.addEventListener("click", closeBoard);
+clearBoardButton.addEventListener("click", resetCanvas);
+saveBoardButton.addEventListener("click", saveBoard);
+boardModal.addEventListener("click", (event) => {
+  if (event.target === boardModal) {
+    closeBoard();
+  }
+});
+
+swatches.forEach((swatch) => {
+  swatch.addEventListener("click", () => {
+    brushColor = swatch.dataset.color;
+    swatches.forEach((button) => button.classList.toggle("active", button === swatch));
+  });
 });
 
 setFilterButtons();

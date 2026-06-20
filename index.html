@@ -87,6 +87,33 @@
       </main>
     </div>
 
+    <div class="modal-backdrop" id="boardModal" hidden>
+      <section class="whiteboard-modal" role="dialog" aria-modal="true" aria-labelledby="boardModalTitle">
+        <header class="modal-header">
+          <div>
+            <p class="eyebrow">Whiteboard</p>
+            <h2 id="boardModalTitle">Sketch board</h2>
+          </div>
+          <button class="tiny-button" id="closeBoardButton" type="button" aria-label="Close whiteboard" title="Close">×</button>
+        </header>
+
+        <div class="whiteboard-tools" aria-label="Whiteboard tools">
+          <button class="swatch active" type="button" data-color="#1f2933" aria-label="Black ink"></button>
+          <button class="swatch" type="button" data-color="#1f8a83" aria-label="Teal ink"></button>
+          <button class="swatch" type="button" data-color="#d65a45" aria-label="Coral ink"></button>
+          <button class="swatch" type="button" data-color="#7763c5" aria-label="Violet ink"></button>
+          <label class="size-control">
+            Size
+            <input id="brushSize" type="range" min="2" max="18" value="5" />
+          </label>
+          <button class="ghost-button" id="clearBoardButton" type="button">Clear</button>
+          <button class="ghost-button" id="saveBoardButton" type="button">Save</button>
+        </div>
+
+        <canvas id="boardCanvas" width="1200" height="720"></canvas>
+      </section>
+    </div>
+
     <template id="categoryTemplate">
       <button class="category-button" type="button">
         <span class="category-color"></span>
@@ -106,6 +133,7 @@
           </div>
         </div>
         <h3></h3>
+        <div class="custom-panel"></div>
         <p class="item-body"></p>
       </article>
     </template>
