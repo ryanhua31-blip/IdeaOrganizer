@@ -559,6 +559,8 @@ textarea:focus {
 }
 
 .tool-button {
+  display: inline-grid;
+  place-items: center;
   min-height: 34px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -566,6 +568,22 @@ textarea:focus {
   color: var(--ink);
   padding: 0 12px;
   font-weight: 800;
+}
+
+.icon-tool {
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+}
+
+.icon-tool svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .tool-button.active {
@@ -579,47 +597,12 @@ textarea:focus {
   height: 32px;
   border: 2px solid #fff;
   border-radius: 999px;
+  background: var(--swatch-color);
   box-shadow: 0 0 0 1px var(--line);
 }
 
 .swatch.active {
   box-shadow: 0 0 0 3px rgba(31, 138, 131, 0.25);
-}
-
-.swatch[data-color="#1f2933"] {
-  background: #1f2933;
-}
-
-.swatch[data-color="#1f8a83"] {
-  background: #1f8a83;
-}
-
-.swatch[data-color="#d65a45"] {
-  background: #d65a45;
-}
-
-.swatch[data-color="#7763c5"] {
-  background: #7763c5;
-}
-
-.swatch[data-color="#2563eb"] {
-  background: #2563eb;
-}
-
-.swatch[data-color="#16a34a"] {
-  background: #16a34a;
-}
-
-.swatch[data-color="#f59e0b"] {
-  background: #f59e0b;
-}
-
-.swatch[data-color="#dc2626"] {
-  background: #dc2626;
-}
-
-.swatch[data-color="#ffffff"] {
-  background: #ffffff;
 }
 
 .size-control {
