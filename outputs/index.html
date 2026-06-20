@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gatherboard Organizer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Categories">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <h1>Gatherboard</h1>
+            <p>Sort notes, boards, tasks, and loose ideas.</p>
+          </div>
+        </div>
+
+        <form class="quick-add" id="categoryForm">
+          <label for="categoryInput">New category</label>
+          <div class="input-row">
+            <input id="categoryInput" name="category" type="text" placeholder="Project, client, week..." autocomplete="off" />
+            <button class="icon-button" type="submit" aria-label="Add category" title="Add category">+</button>
+          </div>
+        </form>
+
+        <nav class="category-list" id="categoryList"></nav>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Current space</p>
+            <h2 id="activeCategoryName"></h2>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-button" id="renameCategoryButton" type="button">Rename</button>
+            <button class="danger-button" id="deleteCategoryButton" type="button">Delete</button>
+          </div>
+        </header>
+
+        <section class="composer" aria-label="Add an item">
+          <form id="itemForm">
+            <div class="field-grid">
+              <label>
+                Item type
+                <select id="itemType">
+                  <option value="note">Random note</option>
+                  <option value="task">Task list</option>
+                  <option value="board">Whiteboard</option>
+                  <option value="link">Reference</option>
+                </select>
+              </label>
+              <label>
+                Title
+                <input id="itemTitle" type="text" placeholder="What is this about?" autocomplete="off" />
+              </label>
+            </div>
+            <label>
+              Details
+              <textarea id="itemBody" rows="4" placeholder="Drop the thought, checklist, source, or sketch idea here."></textarea>
+            </label>
+            <div class="composer-actions">
+              <p id="composerHint">Use short titles so everything stays easy to scan.</p>
+              <button type="submit">Add item</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="filters" aria-label="Item filters">
+          <button class="filter-button active" type="button" data-filter="all">All</button>
+          <button class="filter-button" type="button" data-filter="note">Notes</button>
+          <button class="filter-button" type="button" data-filter="task">Tasks</button>
+          <button class="filter-button" type="button" data-filter="board">Boards</button>
+          <button class="filter-button" type="button" data-filter="link">References</button>
+        </section>
+
+        <section class="board-area" id="itemGrid" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <template id="categoryTemplate">
+      <button class="category-button" type="button">
+        <span class="category-color"></span>
+        <span class="category-name"></span>
+        <span class="category-count"></span>
+      </button>
+    </template>
+
+    <template id="itemTemplate">
+      <article class="item-card">
+        <div class="item-card-header">
+          <span class="type-pill"></span>
+          <div class="card-actions">
+            <button class="tiny-button move-up" type="button" aria-label="Move item up" title="Move up">↑</button>
+            <button class="tiny-button move-down" type="button" aria-label="Move item down" title="Move down">↓</button>
+            <button class="tiny-button delete-item" type="button" aria-label="Delete item" title="Delete">×</button>
+          </div>
+        </div>
+        <h3></h3>
+        <p class="item-body"></p>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
